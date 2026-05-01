@@ -124,34 +124,81 @@
 }
 
 
-@media (min-width: 5em) and (min-height: 5em) {
-  #gameOverScreen h3{
+
+  #gameOverScreen {
+  width: 100%;
+  height: 100%;;
+    max-width: 199vh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    margin: auto;
+    position: absolute;
+    flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+
+  }
+
+  h3 {
     font-family: gameFont;  
     color:rgb(255, 0, 0);
-    font-size: 5em;
+     font-size: 7em;
     position:relative;
     text-align: center;
-
-  }}
+    display: block;
+    margin: auto;
+    height: auto;
+    margin-top: 1em;
+  }
   
   #restartButton {
     font-family: gameFont; 
     animation: blinker 1s linear infinite;
-    font-size: 0.9em; 
     color: rgb(250, 8, 218);
-    background-color: rgb(235, 132, 7);
-    padding: 1em 1em;
-    border-radius: 12px;
+    background-color: rgb(235, 212, 7);
+    border-radius: .5em;
     border-color: rgb(255, 0, 153);
     border-style: double;
-    position: relative;
-    left: 50%;
     transform: translateX(-50%);
-    display: block;
-    margin: auto;
-
+     display: block;
+  padding: 0.5em 0.5em;
+  font-size: 1.5em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: 4em;
   }
 }
+
+  #winScreen {
+  width: 100%;
+  height: 100%;;
+    max-width: 199vh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    margin: auto;
+    position: absolute;
+    flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+
+  }
+
+   h4 {
+    font-family: gameFont;  
+    color:rgb(255, 208, 0);
+     font-size: 7em;
+    position:relative;
+    text-align: center;
+    display: block;
+    margin: auto;
+    height: auto;
+    margin-top: 1em;
+  }
+
 
   @keyframes pulse{
   0%{

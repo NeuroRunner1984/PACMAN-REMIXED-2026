@@ -8,6 +8,7 @@
     <!-- <script src="pacman2.js"></script> -->
     <link rel="icon" type="image/png" href="scaredGhost.png">
 </head>
+
 <body>
    <section id="gameContainer">
             <!-- Start Game Screen -->
@@ -18,14 +19,16 @@
             <h2>REMIXED!</h2>
             <p>Click the start game button to play</p>
             <button id="startGameButton">Start Game</button>
-          
-             
-             <!-- Game Over Screen -->
-        <section id="gameOverScreen" style="display: none;">
-            <h3>GAME OVER</h3>
-            <button id="restartButton">Play Again?</button>
-        </section>  
-     </section>
-        <script type="module" src="pacman2.js"></script> 
-</body>
+        </section>
+        <!-- Game Over Screen -->
+   <section id="gameOverScreen" style="display: none;">
+       <h3>GAME OVER</h3>
+       <button id="restartButton">Play Again?</button>
+   </section>  
+       <section id="winScreen" style="display: none;">
+           <h4> YOU WIN!</h4>
+          <button id="restartButton">Play Again?</button>
+       </section>
+    </body>
+    <script type="module" src="pacman2.js"></script> 
 </html>

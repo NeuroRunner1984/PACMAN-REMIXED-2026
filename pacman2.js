@@ -8,6 +8,7 @@ const boardHeight = rowCount*tileSize;
 const startGame = window.onload; 
 const startOverlay = document.getElementById('startOverlay');
 const startGameButton = document.getElementById('startGameButton');
+let restartButton = document.getElementById('restartButton'); 
 let backGroundMusic = new Audio('Pac-Man_REMIXED_THEME.mp3');
 let eatSound = new Audio ('eatSound.mp3');
 let ghostScream = new Audio ('ghostScream.mp3');
@@ -24,6 +25,7 @@ let pacmanDownImage;
 let pacmanLeftImage;
 let pacmanRightImage;
 let scaredGhostImage;
+let booGhostImage;
 let wallImage;
 let cherryImage;
 let appleImage;
@@ -32,46 +34,48 @@ let powerPelletImage;
 //X = wall, O = skip, P = pac man, ' ' = food, A = apple, C = cherry, S = strawberry, Q = power pellet
 //Ghosts: b = blue, o = orange, p = pink, r = red
 const tileMap = [
-    "XXXXXXXXXXXXXXXXXXX",
-    "X  A     X     A  X",
+    "X XXXXXXXXXXXXXXX X",
+    "X   C    X        X",
     "X XX XXX X XXX XX X",
-    "X    C    Q       X",
+    "X    C    Q    S  X",
     "X XX X XXXXX X XX X",
     "X    X       X  C X",
-    "XXXX XXXX XXXX XXXX",
-    "OOOX X   Q   X XOOO",
+    "XXXX X XX XX X XXXX",
+    "     X   Q   X     ",
     "XXXX X XXrXX X XXXX",
-    "O  S     bpo      O",
+    "   S     bpo       ",
     "XXXX X XXXXX X XXXX",
-    "OOO  X   S   X  OOO",
+    "       S     A   A ",
     "XXXX X XXXXX X XXXX",
     "X    S   X   C    X",
     "X XX XXX X XXX XX X",
-    "X  X     P  Q  X  X",
+    "X      A P  Q     X",
     "XX X X XXXXX X X XX",
-    "X    X   X   X    X",
+    "     X   X   X     ",
     "X XXXXXX X XXXXXX X",
-    "X      C     S  A X",
-    "XXXXXXXXXXXXXXXXXXX" 
+    "X      C     S    X",
+    "X XXXXXXXXXXXXXXX XX" 
 ];
 
 const walls = new Set();
 const foods = new Set();
 const ghosts = new Set();
 const scaredGhosts = new Set(); 
+const booGhosts = new Set(); 
 const cherries = new Set();
 const apples = new Set();
 const strawberries = new Set();
 const powerPellets = new Set();
 // Constants for the ghost state duration
-const FRIGHTENED_TIME = 10000; // 10 seconds in milliseconds
-let pacman;
+const FRIGHTENED_TIME = 7000; // 7 seconds 
+let pacman; 
 
 const directions = ['U', 'D', 'L', 'R']; //up down left right
 let score = 0;
 let lives = 3;
-let pause = false; 
+// let pause = false; 
 let gameOver = false;
+let youWin = false; 
 
 window.onload = function() {
    board = document.getElementById("board");
@@ -90,7 +94,8 @@ window.onload = function() {
 	
     }
 	
-    update();
+    restart();
+    
     document.addEventListener("keyup", movePacman);
 	 startOverlay.style.display = 'flex';
                     board.style.display = 'block';
@@ -132,6 +137,8 @@ function loadImages() {
     redGhostImage.src = "./redGhost.png";
 	scaredGhostImage = new Image();
 	scaredGhostImage.src = "./scaredGhost.png";
+    booGhostImage = new Image();
+    booGhostImage.src = "./boo.png";
 
 	 cherryImage = new Image();
     cherryImage.src = "./cherry2.png";
@@ -160,6 +167,7 @@ function loadMap() {
     strawberries.clear();
     powerPellets.clear();
     ghosts.clear(); 
+   
 
 
     for (let r =0; r < rowCount; r++) {
@@ -197,6 +205,7 @@ function loadMap() {
             ghosts.add(ghost);
 
         }
+       
         else if (tileMapChar == 'P') {//pacman
             pacman = new Block(pacmanRightImage, x, y, tileSize, tileSize);
         }
@@ -229,18 +238,92 @@ function loadMap() {
             powerPellets.add(powerPellet);
 			
         }
+        
 		
     }
+    
     }
+    
 }
 
-function update() {
+
+// Function to handle the "Game Over" state
+function gameOverScreen() {
+    // Display the game over screen and hide the game area
+    document.getElementById('gameContainer').style.display = 'block';
+    document.getElementById('gameOverScreen').style.display = 'block';
+
+    // Add any other game over logic here (e.g., show score, etc.)
+    console.log("Game Over!");
+    
+}
+// Function to handle the "Play Again?" button restarting the game.
+function restartGame() {
+     restartButton = document.getElementById('restartButton'); 
+            console.log("Game restarted!");
+            // Add your game restart logic here
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // other game initialization logic
+
+   if (gameOver) {gameOverScreen();
+        loadMap();
+        resetPositions();
+        lives = 3;
+        score = 0;
+        gameOver = false;
+        // restart(); //restart game loop
+        return;
+    }
+
+    if (youWin) {
+           return;
+         
+        }
+        move();
+        draw();
+        setTimeout(restart, 60);
+    // if (gameOver) {
+         
+    //     return;
+    // }
+    // move();
+    // draw();
+    // setTimeout(restart, 60); //1000/50 = 20 FPS
+            
+        }
+ restartButton = document.getElementById('restartButton');
+        if (restartButton) {
+            restartButton.addEventListener('click', restartGame);
+        }
+
+
+function restart() {
+    
+    if (gameOver) {gameOverScreen();
+        loadMap();
+        resetPositions();
+        lives = 3;
+        score = 0;
+        gameOver = false;
+        // restart(); //restart game loop
+        return;
+    }
     if (gameOver) {
+         
         return;
     }
     move();
     draw();
-    setTimeout(update, 50); //1000/50 = 20 FPS
+    setTimeout(restart, 60); //1000/50 = 20 FPS
+
+
+       
+    
 }
 
     function draw() {
@@ -250,9 +333,6 @@ function update() {
     for (let ghost of ghosts.values()) {
         context.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height);	
 
-        for(let scaredGhost of ghosts.values()) {
-            context.drawImage(scaredGhost.image, scaredGhost.x, scaredGhost.y, scaredGhost.width, scaredGhost.height )
-        }
 
 }
 
@@ -306,7 +386,23 @@ function move() {
             pacman.y -= pacman.velocityY;
             break;
         }
+  
     }
+
+   // Pacman wrap around 
+            if (pacman.x >= (board.width - 32)) {
+                pacman.x = 0;
+            }
+            if (pacman.y >= (board.height - 32)) {
+                pacman.y = 0;
+            }
+            if (pacman.x < 0) {
+                pacman.x = (board.width - 32);
+            }
+            if (pacman.y < 0) {
+                pacman.y = (board.height - 32);
+            }
+
 
     //check ghosts collision
     for (let ghost of ghosts.values()) {
@@ -318,18 +414,7 @@ function move() {
             }
             resetPositions();
         }
-        else {
-            let scaredGhostEaten = null;
-    for(let scaredGhost of scaredGhosts.values())
-    { if(collision(pacman, scaredGhost)){
-        scaredGhostEaten = scaredGhost; 
-      score += 800; 
-      break; 
-    }
-
-    }
-    scaredGhosts.delete(scaredGhostEaten);
-        }
+   
 
         if (ghost.y == tileSize*9 && ghost.direction != 'U' && ghost.direction != 'D') {
             ghost.updateDirection('U');
@@ -344,19 +429,22 @@ function move() {
                 const newDirection = directions[Math.floor(Math.random()*4)];
                 ghost.updateDirection(newDirection);
             }
-            // for (let ghost of ghosts.values()) 
-			// if (ghosts.scaredGhost){
-			// 	if (collison(scaredGhost, pacman)|| ghost.x <= -10 || ghost.x + ghost.width >= boardWidth) {
-            //          ghost.x -= ghost.velocityX;
-            //         ghost.y -= ghost.velocityY;
-            //         const randomDirection = directions[Math.floor(Math.random()*-6)];
-			// 		scaredGhostEaten = scaredGhost; 
-			// 		score += 800; 
-			// 		break; 
-			// 	} 
-			// }
+            
         }
-        // scaredGhost.delete(scaredGhost); // I want googley eyes to return home & not Pacman which this currently does.
+        
+       // Ghosts wrap around 
+            if (ghost.x >= (board.width - 32)) {
+                ghost.x = 0;
+            }
+            if (ghost.y >= (board.height - 32)) {
+                ghost.y = 0;
+            }
+            if (ghost.x < 0) {
+                ghost.x = (board.width - 32);
+            }
+            if (ghost.y < 0) {
+                ghost.y = (board.height - 32);
+            }
     }
 
     
@@ -372,11 +460,43 @@ function move() {
     }
     foods.delete(foodEaten);
 
-    //next level
-    // if (foods.size == 0) {
-    //     loadMap();
-    //     resetPositions();
-    // }
+//     // Winning Time
+//     function winScreen() {
+//     // Display the "You Win!" screen 
+//     document.getElementById('winScreen').style.display = 'block';
+//     // document.getElementById('gameContainer').style.display = 'block';
+//     console.log("YOU WIN!");
+    
+// }
+// if (apples.size === 0) {
+//         winScreen();
+//         loadMap();
+//         resetPositions();
+//         lives = 3;
+//         score = 0;
+//         youWin = true;
+        
+//         var winScreen = document.getElementById('winScreen');
+//         var restartButton = document.getElementById('restartButton');
+        
+//         // 2. Define the action when the button is clicked
+//         restartButton.addEventListener('click', () => {
+//             // 3. Hide the overlay
+//             winScreen.style.display = 'none';
+//         });
+//     }
+
+    // 1. Select the overlay and button
+
+    // return;
+
+// restartButton = document.getElementById('restartButton');
+//     if (restartButton) {
+//         restartButton.addEventListener('click', restartGame,
+// // document.getElementById.winScreen.style.display = 'none'
+//         );
+        
+//     }
 
 	 //check for cherry collision
         let cherryEaten = null;
@@ -423,13 +543,17 @@ function move() {
 			scaredGhostImage.src = "./scaredGhost.png";
     		ghosts.forEach(ghost => {
         	ghost.image = scaredGhostImage; 
-			ghost.isFrightened = true;
-			ghost.frightenedTimer = FRIGHTENED_TIME;
-        	context.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height);
+			// ghost.isFrightened = true;
+			// ghost.frightenedTimer = FRIGHTENED_TIME;
+            setTimeout(() => {
+        // 3. Turn back to normal/blinky
+        ghosts.forEach(ghosts => ghost.image = booGhostImage);
+    }, 7000); // 7 seconds frightened time
+
+            
 	
-
-
     });
+    
     ghostScream.play(); 
     powerPelletEaten = powerPellet; 
     score += 50;
@@ -439,19 +563,19 @@ function move() {
         }
         powerPellets.delete(powerPelletEaten);
     
-}
+    }
 
 
 function movePacman(e) {
-    if (gameOver) {
-        loadMap();
-        resetPositions();
-        lives = 3;
-        score = 0;
-        gameOver = false;
-        update(); //restart game loop
-        return;
-    }
+    // if (gameOver) {
+    //     loadMap();
+    //     resetPositions();
+    //     lives = 3;
+    //     score = 0;
+    //     gameOver = false;
+    //    restart(); //restart game loop
+    //     return;
+    // }
 
     if (e.code == "ArrowUp" || e.code == "KeyW") {
         pacman.updateDirection('U');
@@ -490,6 +614,7 @@ function collision(a, b) {
 }
 
 function resetPositions() {
+       console.log({ pacman, ghosts }); // Check if these are defined
     pacman.reset();
     pacman.velocityX = 0;
     pacman.velocityY = 0;
@@ -559,39 +684,4 @@ class Block {
     }
 };
 
-
-const GhostState = {
-    NORMAL: 'normal',
-    FRIGHTENED: 'scaredGhost', // Blue mode
-    EYES: 'eyes' // Returning to house
-};
-
-
-function activatePowerPellet() {
-    // Clear any existing timer to reset the duration if another pellet is eaten
-    if (powerPelletTimer) {
-        clearTimeout(powerPelletTimer);
-    }
-
-    // Set all ghosts to frightened (blue) state
-    ghosts.forEach(ghost => {
-        if (ghost.state !== GhostState.EYES) {
-            ghost.state = GhostState.FRIGHTENED;
-        }
-    });
-
-    // Start a timer for the blue state duration (e.g., 10 seconds)
-    powerPelletTimer = setTimeout(() => {
-        revertGhosts();
-    }, 1000); 
-}
-
-function revertGhosts() {
-    ghosts.forEach(ghost => {
-        if (ghost.state === GhostState.FRIGHTENED) {
-            ghost.state = GhostState.NORMAL;
-        }
-    });
-    powerPelletTimer = null;
-}
 
