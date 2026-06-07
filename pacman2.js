@@ -147,7 +147,7 @@ function loadImages() {
     strawberryImage = new Image();
     strawberryImage.src = "./strawberry.png";
     powerPelletImage = new Image();
-    powerPelletImage.src = "./powerpellet.png";
+    powerPelletImage.src = "powerpellet.png";
 
     pacmanUpImage = new Image();
     pacmanUpImage.src = "./pacmanUp.png";
