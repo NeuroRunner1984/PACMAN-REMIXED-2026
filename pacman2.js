@@ -93,6 +93,8 @@ window.onload = function() {
         ghost.updateDirection(newDirection);
 	
     }
+
+    setupSwipeControls(); 
 	
     restart();
     
@@ -147,7 +149,7 @@ function loadImages() {
     strawberryImage = new Image();
     strawberryImage.src = "./strawberry.png";
     powerPelletImage = new Image();
-    powerPelletImage.src = "./powerPellet.png";
+    powerPelletImage.src = "powerpellet.png";
 
     pacmanUpImage = new Image();
     pacmanUpImage.src = "./pacmanUp.png";
@@ -567,28 +569,17 @@ function move() {
 
 
 function movePacman(e) {
-    // if (gameOver) {
-    //     loadMap();
-    //     resetPositions();
-    //     lives = 3;
-    //     score = 0;
-    //     gameOver = false;
-    //    restart(); //restart game loop
-    //     return;
-    // }
+    
 
-    if (e.code == "ArrowUp" || e.code == "KeyW") {
-        pacman.updateDirection('U');
-    }
-    else if (e.code == "ArrowDown" || e.code == "KeyS") {
-        pacman.updateDirection('D');
-    }
-    else if (e.code == "ArrowLeft" || e.code == "KeyA") {
-        pacman.updateDirection('L');
-    }
-    else if (e.code == "ArrowRight" || e.code == "KeyD") {
-        pacman.updateDirection('R');
-    }
+    let dir = null;
+
+    if (e.code === "ArrowUp" || e.code === "KeyW") dir = 'U';
+    else if (e.code === "ArrowDown" || e.code === "KeyS") dir = 'D';
+    else if (e.code === "ArrowLeft" || e.code === "KeyA") dir = 'L';
+    else if (e.code === "ArrowRight" || e.code === "KeyD") dir = 'R';
+
+    if (dir) setPacmanDirection(dir);
+
 
     //update pacman images
     if (pacman.direction == 'U') {
@@ -604,6 +595,73 @@ function movePacman(e) {
         pacman.image = pacmanRightImage;
     }
     
+}
+function setPacmanDirection(dir) {
+    pacman.updateDirection(dir);
+
+    if (dir === 'U') pacman.image = pacmanUpImage;
+    else if (dir === 'D') pacman.image = pacmanDownImage;
+    else if (dir === 'L') pacman.image = pacmanLeftImage;
+    else if (dir === 'R') pacman.image = pacmanRightImage;
+}
+let swipeStart = null;
+let swipeDirection = null;
+
+const SWIPE_START_THRESHOLD = 24; // minimum drag to start a swipe
+const SWIPE_CHANGE_THRESHOLD = 40; // require more movement to change direction mid-drag
+
+function getSwipeCandidate(dx, dy) {
+    if (Math.abs(dx) < SWIPE_START_THRESHOLD && Math.abs(dy) < SWIPE_START_THRESHOLD) {
+        return null;
+    }
+    return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U');
+}
+
+function updateSwipeDirection(dx, dy) {
+    const candidate = getSwipeCandidate(dx, dy);
+    if (!candidate) return;
+
+    if (swipeDirection === null) {
+        swipeDirection = candidate;
+        setPacmanDirection(candidate);
+        return;
+    }
+
+    if (candidate !== swipeDirection) {
+        if (Math.abs(dx) > SWIPE_CHANGE_THRESHOLD || Math.abs(dy) > SWIPE_CHANGE_THRESHOLD) {
+            swipeDirection = candidate;
+            setPacmanDirection(candidate);
+        }
+    }
+}
+
+function onBoardPointerDown(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    swipeStart = { x: event.clientX, y: event.clientY };
+    swipeDirection = null;
+    board.setPointerCapture(event.pointerId);
+}
+
+function onBoardPointerMove(event) {
+    if (!swipeStart) return;
+
+    const dx = event.clientX - swipeStart.x;
+    const dy = event.clientY - swipeStart.y;
+    updateSwipeDirection(dx, dy);
+}
+
+function onBoardPointerEnd() {
+    swipeStart = null;
+    swipeDirection = null;
+}
+
+function setupSwipeControls() {
+    board.style.touchAction = 'none';
+
+    board.addEventListener('pointerdown', onBoardPointerDown);
+    board.addEventListener('pointermove', onBoardPointerMove);
+    board.addEventListener('pointerup', onBoardPointerEnd);
+    board.addEventListener('pointercancel', onBoardPointerEnd);
 }
 
 function collision(a, b) {
